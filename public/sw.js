@@ -1,5 +1,7 @@
 const CACHE = 'todos-v1';
-const SHELL = ['/', '/manifest.json'];
+// Only cache static assets — not '/' (authenticated HTML that could be
+// served stale after logout).
+const SHELL = ['/manifest.json'];
 
 self.addEventListener('install', (event) => {
     event.waitUntil(
@@ -25,20 +27,29 @@ self.addEventListener('fetch', (event) => {
     if (request.method !== 'GET' || url.origin !== location.origin) return;
 
     if (url.pathname.startsWith('/api/')) {
-        // API reads: network first, fall back to cache
+        // API reads: network first, cache only successful responses,
+        // return a structured offline response when no cache is available.
         event.respondWith(
             fetch(request)
                 .then((res) => {
-                    const clone = res.clone();
-                    caches.open(CACHE).then((cache) => cache.put(request, clone));
+                    if (res.ok) {
+                        const clone = res.clone();
+                        caches.open(CACHE).then((cache) => cache.put(request, clone));
+                    }
                     return res;
                 })
-                .catch(() => caches.match(request))
+                .catch(async () => {
+                    const cached = await caches.match(request);
+                    return cached ?? new Response(
+                        JSON.stringify({ message: 'Offline — cached data unavailable.' }),
+                        { status: 503, headers: { 'Content-Type': 'application/json' } }
+                    );
+                })
         );
         return;
     }
 
-    // App shell: cache first, then network
+    // Static assets: cache first, then network
     event.respondWith(
         caches.match(request).then((cached) => cached ?? fetch(request))
     );

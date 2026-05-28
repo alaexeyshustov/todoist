@@ -142,6 +142,8 @@ Alpine.data('todoApp', () => ({
         const from = this.todos.findIndex(t => t.id === this.draggingId);
         const to = this.todos.findIndex(t => t.id === todo.id);
         if (from === -1 || to === -1) return;
+        // In-memory reorder only — order resets on refresh until a position
+        // column and reorder API endpoint are added.
         this.todos.splice(to, 0, this.todos.splice(from, 1)[0]);
     },
 
@@ -157,7 +159,7 @@ Alpine.data('todoApp', () => ({
     },
 
     setupEcho() {
-        window.Echo.channel('todos')
+        window.Echo.private('todos')
             .listen('.TodoCreated', ({ todo }) => {
                 if (!this.todos.find(t => t.id === todo.id)) {
                     this.todos.push(todo);

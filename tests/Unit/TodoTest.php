@@ -1,7 +1,6 @@
 <?php
 
 use App\Models\Todo;
-use App\Models\TodoList;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 it('defaults done to false', function () {
