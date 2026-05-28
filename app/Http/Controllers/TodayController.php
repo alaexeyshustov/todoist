@@ -14,7 +14,7 @@ class TodayController extends Controller
         $todos = Todo::query()
             ->whereHas('todoList', fn ($q) => $q->where('user_id', $request->user()->id))
             ->whereNull('parent_id')
-            ->dueToday()
+            ->dueOrOverdue()
             ->where('done', false)
             ->ordered()
             ->get();

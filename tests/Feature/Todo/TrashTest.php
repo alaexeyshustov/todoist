@@ -59,4 +59,17 @@ describe('Trash', function () {
             ->deleteJson("/api/todos/{$todo->id}/force")
             ->assertForbidden();
     });
+
+    it('force deleting a parent hard-deletes its subtasks via cascade', function () {
+        $list = TodoList::factory()->create();
+        $parent = Todo::factory()->create(['todo_list_id' => $list->id]);
+        $subtask = Todo::factory()->create(['todo_list_id' => $list->id, 'parent_id' => $parent->id]);
+        $parent->delete();
+
+        $this->actingAs($list->user)
+            ->deleteJson("/api/todos/{$parent->id}/force")
+            ->assertNoContent();
+
+        $this->assertDatabaseMissing('todos', ['id' => $subtask->id]);
+    });
 });

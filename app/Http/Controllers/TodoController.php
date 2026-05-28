@@ -48,11 +48,9 @@ class TodoController extends Controller
     {
         $this->authorize('update', $todo);
 
-        $wasNotDone = ! $todo->done;
-        $becomingDone = $wasNotDone && (bool) ($request->validated()['done'] ?? false);
         $todo->update($request->validated());
 
-        if ($becomingDone && $todo->recurrence) {
+        if ($todo->wasChanged('done') && $todo->done && $todo->recurrence) {
             dispatch(new CreateNextRecurrence($todo));
         }
 
@@ -93,6 +91,7 @@ class TodoController extends Controller
         return new TodoResource($todo);
     }
 
+    // Cascades: the parent_id FK with cascadeOnDelete will also hard-delete any subtasks.
     public function forceDelete(Request $request, int $id): JsonResponse
     {
         $todo = Todo::onlyTrashed()->findOrFail($id);

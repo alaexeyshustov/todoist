@@ -14,6 +14,7 @@ class TodoListResource extends JsonResource
         return [
             'id' => $this->resource->id,
             'name' => $this->resource->name,
+            'todos_count' => $this->resource->todos_count ?? $this->resource->todos()->count(),
             'created_at' => $this->resource->created_at->toIso8601String(),
         ];
     }

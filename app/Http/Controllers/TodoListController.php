@@ -15,7 +15,7 @@ class TodoListController extends Controller
     public function index(Request $request): AnonymousResourceCollection
     {
         return TodoListResource::collection(
-            $request->user()->todoLists()->get()
+            $request->user()->todoLists()->withCount('todos')->get()
         );
     }
 

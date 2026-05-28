@@ -111,6 +111,31 @@ describe('Todo', function () {
                 ->assertUnprocessable()
                 ->assertJsonValidationErrors(['title']);
         });
+
+        it('returns 422 when creating a todo in another user\'s list', function () {
+            $otherList = TodoList::factory()->create();
+            $user = User::factory()->create();
+
+            $this->actingAs($user)
+                ->postJson('/api/todos', ['todo_list_id' => $otherList->id, 'title' => 'Hack'])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['todo_list_id']);
+        });
+
+        it('returns 422 when using another user\'s todo as parent', function () {
+            $otherList = TodoList::factory()->create();
+            $otherTodo = Todo::factory()->create(['todo_list_id' => $otherList->id]);
+            $myList = TodoList::factory()->create();
+
+            $this->actingAs($myList->user)
+                ->postJson('/api/todos', [
+                    'todo_list_id' => $myList->id,
+                    'parent_id' => $otherTodo->id,
+                    'title' => 'Hack',
+                ])
+                ->assertUnprocessable()
+                ->assertJsonValidationErrors(['parent_id']);
+        });
     });
 
     describe('show', function () {

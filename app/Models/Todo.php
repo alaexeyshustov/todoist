@@ -65,7 +65,7 @@ class Todo extends Model
     }
 
     /** @param Builder<Todo> $query */
-    public function scopeDueToday(Builder $query): Builder
+    public function scopeDueOrOverdue(Builder $query): Builder
     {
         return $query->whereDate('due_at', '<=', Carbon::today());
     }
