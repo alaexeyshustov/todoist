@@ -14,7 +14,7 @@ class DatabaseSeeder extends Seeder
 
     public function run(): void
     {
-        User::firstOrCreate(
+        $user = User::firstOrCreate(
             ['email' => env('ADMIN_EMAIL', 'admin@localhost')],
             [
                 'name' => 'Admin',
@@ -22,6 +22,8 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        TodoList::firstOrCreate(['name' => 'Inbox']);
+        TodoList::firstOrCreate(
+            ['name' => 'Inbox', 'user_id' => $user->id],
+        );
     }
 }

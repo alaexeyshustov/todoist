@@ -3,15 +3,12 @@
 namespace App\Jobs;
 
 use App\Enums\Recurrence;
+use App\Events\TodoCreated;
 use App\Models\Todo;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Carbon;
 
-class CreateNextRecurrence implements ShouldQueue
+class CreateNextRecurrence
 {
-    use Queueable;
-
     public function __construct(public readonly Todo $todo) {}
 
     public function handle(): void
@@ -20,6 +17,8 @@ class CreateNextRecurrence implements ShouldQueue
         $next->done = false;
         $next->due_at = $this->nextDueAt();
         $next->save();
+
+        broadcast(new TodoCreated($next->load('subtasks')));
     }
 
     private function nextDueAt(): ?Carbon
