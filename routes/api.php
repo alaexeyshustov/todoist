@@ -3,9 +3,13 @@
 use App\Http\Controllers\TodayController;
 use App\Http\Controllers\TodoController;
 use App\Http\Controllers\TodoListController;
+use App\Http\Controllers\TodoListExportController;
+use App\Http\Controllers\TodoListImportController;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth')->group(function () {
+    Route::get('lists/{list}/export', TodoListExportController::class);
+    Route::post('lists/import', TodoListImportController::class);
     Route::apiResource('lists', TodoListController::class);
 
     Route::get('todos/trashed', [TodoController::class, 'trashed']);
