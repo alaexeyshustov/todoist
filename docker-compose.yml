@@ -1,0 +1,48 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      - app
+      - reverb
+
+  app:
+    image: ghcr.io/OWNER/todoist:latest  # replace OWNER with your GitHub username (lowercase)
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - db-data:/var/www/html/database
+      - app-storage:/var/www/html/storage
+
+  reverb:
+    image: ghcr.io/OWNER/todoist:latest  # replace OWNER with your GitHub username (lowercase)
+    restart: unless-stopped
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    env_file: .env
+    volumes:
+      - db-data:/var/www/html/database
+      - app-storage:/var/www/html/storage
+
+  worker:
+    image: ghcr.io/OWNER/todoist:latest  # replace OWNER with your GitHub username (lowercase)
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=3"]
+    env_file: .env
+    volumes:
+      - db-data:/var/www/html/database
+      - app-storage:/var/www/html/storage
+
+volumes:
+  db-data:
+  app-storage:
+  caddy-data:
+  caddy-config:

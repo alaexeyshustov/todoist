@@ -1,0 +1,14 @@
+{$APP_DOMAIN} {
+    # WebSocket connections from the browser to Reverb
+    handle /app/* {
+        reverse_proxy reverb:8080
+    }
+
+    # PHP app via FastCGI
+    handle {
+        root * /var/www/html/public
+        encode gzip
+        php_fastcgi app:9000
+        file_server
+    }
+}
