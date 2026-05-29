@@ -12,7 +12,7 @@ class TodoListImportController extends Controller
     public function __invoke(Request $request): JsonResponse
     {
         $request->validate([
-            'file' => ['required', 'file'],
+            'file' => ['required', 'file', 'extensions:md,txt', 'max:512'],
             'name' => ['nullable', 'string', 'max:255'],
         ]);
 

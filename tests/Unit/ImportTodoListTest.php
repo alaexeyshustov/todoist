@@ -61,6 +61,15 @@ describe('ImportTodoList', function () {
         expect($list->name)->toBe('Fallback Name');
     });
 
+    it('truncates a heading longer than 255 characters to avoid a DB error', function () {
+        $user = User::factory()->create();
+        $longHeading = str_repeat('A', 300);
+
+        $list = (new ImportTodoList)->execute("# {$longHeading}\n", $user);
+
+        expect(strlen($list->name))->toBeLessThanOrEqual(255);
+    });
+
     it('round-trips an exported list', function () {
         $user = User::factory()->create();
         $original = \App\Models\TodoList::factory()->create(['name' => 'Shopping', 'user_id' => $user->id]);

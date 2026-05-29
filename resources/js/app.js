@@ -165,7 +165,9 @@ Alpine.data('todoApp', () => ({
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         a.href = url;
-        a.download = `${list.name}.md`;
+        const disposition = res.headers.get('Content-Disposition') ?? '';
+        const match = disposition.match(/filename="?([^";\s]+)"?/);
+        a.download = match ? match[1] : `${list.name}.md`;
         a.click();
         URL.revokeObjectURL(url);
     },
@@ -196,8 +198,9 @@ Alpine.data('todoApp', () => ({
         event.target.value = '';
         if (!res.ok) return;
         const data = await res.json();
-        this.lists.push(data.data);
-        this.currentListId = data.data.id;
+        const imported = data.data ?? data;
+        this.lists.push(imported);
+        this.currentListId = imported.id;
         await this.fetchTodos();
     },
 

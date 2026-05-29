@@ -15,7 +15,8 @@ class TodoListExportController extends Controller
         $this->authorize('view', $list);
 
         $markdown = (new ExportTodoList)->execute($list);
-        $filename = Str::slug($list->name) . '.md';
+        $slug = Str::slug($list->name);
+        $filename = ($slug !== '' ? $slug : "list-{$list->id}") . '.md';
 
         return response($markdown)
             ->header('Content-Type', 'text/markdown')

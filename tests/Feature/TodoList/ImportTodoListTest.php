@@ -34,6 +34,16 @@ describe('POST /api/lists/import', function () {
             ->assertUnauthorized();
     });
 
+    it('returns 422 for a non-markdown file extension', function () {
+        $user = User::factory()->create();
+        $file = UploadedFile::fake()->createWithContent('data.csv', "title,done\nBuy milk,false");
+
+        $this->actingAs($user)
+            ->post('/api/lists/import', ['file' => $file])
+            ->assertUnprocessable()
+            ->assertJsonValidationErrors(['file']);
+    });
+
     it('uses the name override when provided', function () {
         $user = User::factory()->create();
         $file = UploadedFile::fake()->createWithContent('shopping.md', "# Shopping\n\n- [ ] Buy milk\n");

@@ -11,7 +11,11 @@ class ExportTodoList
     {
         $lines = ["# {$list->name}"];
 
-        $todos = $list->todos()->whereNull('parent_id')->with('subtasks')->get();
+        $todos = $list->todos()
+            ->whereNull('parent_id')
+            ->with(['subtasks' => fn ($q) => $q->where('todo_list_id', $list->id)->orderBy('id')])
+            ->orderBy('id')
+            ->get();
 
         if ($todos->isNotEmpty()) {
             $lines[] = '';

@@ -11,7 +11,7 @@ class ImportTodoList
     public function execute(string $markdown, User $user, ?string $nameOverride = null): TodoList
     {
         $lines = explode("\n", $markdown);
-        $name = $nameOverride ?? $this->extractHeading($lines) ?? 'Imported';
+        $name = substr($nameOverride ?? $this->extractHeading($lines) ?? 'Imported', 0, 255);
         $list = $user->todoLists()->create(['name' => $name]);
 
         $lastParent = null;

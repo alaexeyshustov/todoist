@@ -32,4 +32,13 @@ describe('GET /api/lists/{id}/export', function () {
         $this->get("/api/lists/{$list->id}/export")
             ->assertUnauthorized();
     });
+
+    it('uses list-{id}.md as filename when the list name produces an empty slug', function () {
+        $list = TodoList::factory()->create(['name' => '日本語']);
+
+        $this->actingAs($list->user)
+            ->get("/api/lists/{$list->id}/export")
+            ->assertOk()
+            ->assertDownload("list-{$list->id}.md");
+    });
 });
