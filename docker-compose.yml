@@ -1,0 +1,51 @@
+services:
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      APP_DOMAIN: ${APP_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+      - public-assets:/srv/public:ro
+    depends_on:
+      - app
+      - reverb
+
+  app:
+    image: ${APP_IMAGE}
+    restart: unless-stopped
+    env_file: .env
+    volumes:
+      - db-data:/var/www/data
+      - app-storage:/var/www/html/storage
+      - public-assets:/mnt/public
+
+  reverb:
+    image: ${APP_IMAGE}
+    restart: unless-stopped
+    command: ["php", "artisan", "reverb:start", "--host=0.0.0.0", "--port=8080"]
+    env_file: .env
+    volumes:
+      - db-data:/var/www/data
+      - app-storage:/var/www/html/storage
+
+  worker:
+    image: ${APP_IMAGE}
+    restart: unless-stopped
+    command: ["php", "artisan", "queue:work", "--tries=3", "--sleep=3"]
+    env_file: .env
+    volumes:
+      - db-data:/var/www/data
+      - app-storage:/var/www/html/storage
+
+volumes:
+  db-data:
+  app-storage:
+  public-assets:
+  caddy-data:
+  caddy-config:
