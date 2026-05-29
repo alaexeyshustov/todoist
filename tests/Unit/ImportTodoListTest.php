@@ -1,6 +1,8 @@
 <?php
 
+use App\Actions\ExportTodoList;
 use App\Actions\ImportTodoList;
+use App\Models\Todo;
 use App\Models\TodoList;
 use App\Models\User;
 
@@ -72,11 +74,11 @@ describe('ImportTodoList', function () {
 
     it('round-trips an exported list', function () {
         $user = User::factory()->create();
-        $original = \App\Models\TodoList::factory()->create(['name' => 'Shopping', 'user_id' => $user->id]);
-        $parent = \App\Models\Todo::factory()->create(['todo_list_id' => $original->id, 'title' => 'Groceries', 'done' => false]);
-        \App\Models\Todo::factory()->create(['todo_list_id' => $original->id, 'parent_id' => $parent->id, 'title' => 'Milk', 'done' => true]);
+        $original = TodoList::factory()->create(['name' => 'Shopping', 'user_id' => $user->id]);
+        $parent = Todo::factory()->create(['todo_list_id' => $original->id, 'title' => 'Groceries', 'done' => false]);
+        Todo::factory()->create(['todo_list_id' => $original->id, 'parent_id' => $parent->id, 'title' => 'Milk', 'done' => true]);
 
-        $markdown = (new \App\Actions\ExportTodoList)->execute($original);
+        $markdown = (new ExportTodoList)->execute($original);
         $imported = (new ImportTodoList)->execute($markdown, $user);
 
         expect($imported->name)->toBe('Shopping');

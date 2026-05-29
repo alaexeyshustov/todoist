@@ -2,7 +2,6 @@
 
 namespace App\Actions;
 
-use App\Models\Todo;
 use App\Models\TodoList;
 use App\Models\User;
 
@@ -12,6 +11,7 @@ class ImportTodoList
     {
         $lines = explode("\n", $markdown);
         $name = substr($nameOverride ?? $this->extractHeading($lines) ?? 'Imported', 0, 255);
+        /** @var TodoList $list */
         $list = $user->todoLists()->create(['name' => $name]);
 
         $lastParent = null;

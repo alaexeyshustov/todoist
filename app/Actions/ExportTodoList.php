@@ -22,17 +22,18 @@ class ExportTodoList
             foreach ($todos as $todo) {
                 $lines[] = $this->formatLine($todo);
                 foreach ($todo->subtasks as $subtask) {
-                    $lines[] = '  ' . $this->formatLine($subtask);
+                    $lines[] = '  '.$this->formatLine($subtask);
                 }
             }
         }
 
-        return implode("\n", $lines) . "\n";
+        return implode("\n", $lines)."\n";
     }
 
     private function formatLine(Todo $todo): string
     {
         $checkbox = $todo->done ? '[x]' : '[ ]';
+
         return "- {$checkbox} {$todo->title}";
     }
 }
