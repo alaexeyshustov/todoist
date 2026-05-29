@@ -66,11 +66,12 @@ describe('Broadcasting', function () {
             $todo = Todo::factory()->create(['todo_list_id' => $list->id, 'title' => 'Buy milk']);
             $todo->load('subtasks');
             $event = new TodoCreated($todo);
+            $payload = $event->broadcastWith();
 
             expect($event->broadcastAs())->toBe('TodoCreated')
-                ->and($event->broadcastWith())->toHaveKey('todo')
-                ->and($event->broadcastWith()['todo']['title'])->toBe('Buy milk')
-                ->and($event->broadcastWith()['todo'])->toHaveKey('subtasks');
+                ->and($payload)->toHaveKey('todo')
+                ->and($payload['todo']['title'])->toBe('Buy milk')
+                ->and($payload['todo'])->toHaveKey('subtasks');
         });
 
         it('broadcasts TodoUpdated payload with todo resource', function () {
@@ -78,10 +79,11 @@ describe('Broadcasting', function () {
             $todo = Todo::factory()->create(['todo_list_id' => $list->id, 'title' => 'Read book']);
             $todo->load('subtasks');
             $event = new TodoUpdated($todo);
+            $payload = $event->broadcastWith();
 
             expect($event->broadcastAs())->toBe('TodoUpdated')
-                ->and($event->broadcastWith())->toHaveKey('todo')
-                ->and($event->broadcastWith()['todo']['title'])->toBe('Read book');
+                ->and($payload)->toHaveKey('todo')
+                ->and($payload['todo']['title'])->toBe('Read book');
         });
     });
 

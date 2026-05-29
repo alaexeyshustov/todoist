@@ -18,7 +18,7 @@ class CreateNextRecurrence
         $next->due_at = $this->nextDueAt();
         $next->save();
 
-        broadcast(new TodoCreated($next->load('subtasks')));
+        broadcast(new TodoCreated($next));
     }
 
     private function nextDueAt(): ?Carbon
