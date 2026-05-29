@@ -6,7 +6,7 @@
 
     # PHP app via FastCGI
     handle {
-        root * /var/www/html/public
+        root * /srv/public
         encode gzip
         php_fastcgi app:9000
         file_server
