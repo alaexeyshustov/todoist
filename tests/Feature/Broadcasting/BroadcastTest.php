@@ -60,6 +60,31 @@ describe('Broadcasting', function () {
             expect($event->broadcastWith())->toBe(['id' => $todo->id])
                 ->and($event->broadcastAs())->toBe('TodoDeleted');
         });
+
+        it('broadcasts TodoCreated payload with todo resource', function () {
+            $list = TodoList::factory()->create();
+            $todo = Todo::factory()->create(['todo_list_id' => $list->id, 'title' => 'Buy milk']);
+            $todo->load('subtasks');
+            $event = new TodoCreated($todo);
+            $payload = $event->broadcastWith();
+
+            expect($event->broadcastAs())->toBe('TodoCreated')
+                ->and($payload)->toHaveKey('todo')
+                ->and($payload['todo']['title'])->toBe('Buy milk')
+                ->and($payload['todo'])->toHaveKey('subtasks');
+        });
+
+        it('broadcasts TodoUpdated payload with todo resource', function () {
+            $list = TodoList::factory()->create();
+            $todo = Todo::factory()->create(['todo_list_id' => $list->id, 'title' => 'Read book']);
+            $todo->load('subtasks');
+            $event = new TodoUpdated($todo);
+            $payload = $event->broadcastWith();
+
+            expect($event->broadcastAs())->toBe('TodoUpdated')
+                ->and($payload)->toHaveKey('todo')
+                ->and($payload['todo']['title'])->toBe('Read book');
+        });
     });
 
     describe('channel authorization', function () {

@@ -139,6 +139,11 @@ describe('Todo', function () {
     });
 
     describe('show', function () {
+        it('returns 404 for a non-existent todo', function () {
+            $list = TodoList::factory()->create();
+            $this->actingAs($list->user)->getJson('/api/todos/99999')->assertNotFound();
+        });
+
         it('returns a todo with subtasks', function () {
             $list = TodoList::factory()->create();
             $todo = Todo::factory()->create(['todo_list_id' => $list->id]);
@@ -161,6 +166,11 @@ describe('Todo', function () {
     });
 
     describe('update', function () {
+        it('returns 404 for a non-existent todo', function () {
+            $list = TodoList::factory()->create();
+            $this->actingAs($list->user)->patchJson('/api/todos/99999', ['done' => true])->assertNotFound();
+        });
+
         it('marks a todo as done', function () {
             $list = TodoList::factory()->create();
             $todo = Todo::factory()->create(['todo_list_id' => $list->id]);
@@ -220,6 +230,11 @@ describe('Todo', function () {
     });
 
     describe('destroy', function () {
+        it('returns 404 for a non-existent todo', function () {
+            $list = TodoList::factory()->create();
+            $this->actingAs($list->user)->deleteJson('/api/todos/99999')->assertNotFound();
+        });
+
         it('soft deletes a todo', function () {
             $list = TodoList::factory()->create();
             $todo = Todo::factory()->create(['todo_list_id' => $list->id]);

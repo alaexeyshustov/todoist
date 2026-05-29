@@ -30,6 +30,11 @@ describe('TodoList', function () {
                 ->assertJson(['data' => ['name' => 'Work']]);
         });
 
+        it('returns 404 for a non-existent list', function () {
+            $user = User::factory()->create();
+            $this->actingAs($user)->getJson('/api/lists/99999')->assertNotFound();
+        });
+
         it('returns 403 for another user\'s list', function () {
             $list = TodoList::factory()->create();
             $other = User::factory()->create();
@@ -41,6 +46,11 @@ describe('TodoList', function () {
     });
 
     describe('update', function () {
+        it('returns 404 for a non-existent list', function () {
+            $user = User::factory()->create();
+            $this->actingAs($user)->patchJson('/api/lists/99999', ['name' => 'X'])->assertNotFound();
+        });
+
         it('renames a todo list', function () {
             $list = TodoList::factory()->create(['name' => 'Old']);
             $this->actingAs($list->user)
@@ -70,6 +80,11 @@ describe('TodoList', function () {
     });
 
     describe('destroy', function () {
+        it('returns 404 for a non-existent list', function () {
+            $user = User::factory()->create();
+            $this->actingAs($user)->deleteJson('/api/lists/99999')->assertNotFound();
+        });
+
         it('deletes a todo list', function () {
             $list = TodoList::factory()->create();
             $this->actingAs($list->user)
