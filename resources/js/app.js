@@ -158,6 +158,52 @@ Alpine.data('todoApp', () => ({
         });
     },
 
+    async exportList(list) {
+        const res = await fetch(`/api/lists/${list.id}/export`);
+        if (!res.ok) return;
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        const disposition = res.headers.get('Content-Disposition') ?? '';
+        const match = disposition.match(/filename="?([^";\s]+)"?/);
+        a.download = match ? match[1] : `${list.name}.md`;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
+
+    async importList(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const text = await file.text();
+        const match = text.match(/^# (.+)$/m);
+        const proposedName = match ? match[1].trim() : file.name.replace(/\.md$/i, '');
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const collision = this.lists.some(l => l.name === proposedName);
+        if (collision) {
+            const name = prompt(`A list named "${proposedName}" already exists. Enter a new name:`, `${proposedName} (2)`);
+            if (!name) { event.target.value = ''; return; }
+            formData.append('name', name);
+        }
+
+        const res = await fetch('/api/lists/import', {
+            method: 'POST',
+            headers: { 'X-CSRF-TOKEN': csrfToken() },
+            body: formData,
+        });
+        event.target.value = '';
+        if (!res.ok) return;
+        const data = await res.json();
+        const imported = data.data ?? data;
+        this.lists.push(imported);
+        this.currentListId = imported.id;
+        await this.fetchTodos();
+    },
+
     setupEcho() {
         window.Echo.private('todos')
             .listen('.TodoCreated', ({ todo }) => {
