@@ -3,31 +3,23 @@
 namespace App\Actions;
 
 use App\Models\TodoList;
+use Illuminate\Support\Facades\DB;
 
 class SyncTodoList
 {
     public function execute(TodoList $list, string $markdown): TodoList
     {
-        $list->todos()->forceDelete();
+        DB::transaction(function () use ($list, $markdown) {
+            $list->todos()->forceDelete();
 
-        $lines = explode("\n", $markdown);
-        $lastParent = null;
-
-        foreach ($lines as $line) {
-            if (preg_match('/^- \[([ x])\] (.+)$/', $line, $m)) {
-                $lastParent = $list->todos()->create([
-                    'title' => trim($m[2]),
-                    'done' => $m[1] === 'x',
-                ]);
-            } elseif (preg_match('/^  - \[([ x])\] (.+)$/', $line, $m) && $lastParent) {
-                $list->todos()->create([
-                    'title' => trim($m[2]),
-                    'done' => $m[1] === 'x',
-                    'parent_id' => $lastParent->id,
-                ]);
+            foreach (MarkdownTodoParser::parse($markdown) as $item) {
+                $parent = $list->todos()->create(['title' => $item['title'], 'done' => $item['done']]);
+                foreach ($item['subtasks'] as $sub) {
+                    $list->todos()->create(['title' => $sub['title'], 'done' => $sub['done'], 'parent_id' => $parent->id]);
+                }
             }
-        }
+        });
 
-        return $list->fresh();
+        return $list->loadCount('todos');
     }
 }

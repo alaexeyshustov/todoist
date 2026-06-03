@@ -13,9 +13,7 @@ class TodoListSyncController extends Controller
 {
     public function __invoke(Request $request, TodoList $list): JsonResponse
     {
-        if ($list->user_id !== $request->user()->id) {
-            return response()->json(['message' => 'Forbidden.'], 403);
-        }
+        $this->authorize('update', $list);
 
         $markdown = $request->getContent();
         $list = (new SyncTodoList)->execute($list, $markdown);

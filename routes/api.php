@@ -18,7 +18,7 @@ Route::middleware('auth:sanctum,web')->group(function () {
 
     Route::get('lists/{list}/export', TodoListExportController::class);
     Route::post('lists/import', TodoListImportController::class);
-    Route::put('lists/{list}/sync', TodoListSyncController::class);
+    Route::put('lists/{list}/sync', TodoListSyncController::class)->middleware('throttle:30,1');
     Route::apiResource('lists', TodoListController::class);
 
     Route::get('todos/trashed', [TodoController::class, 'trashed']);
